@@ -30,6 +30,10 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
+app.post('/urls/:shortURL', (req, res) => {
+  urlDatabase[req.params.shortURL] = req.body.longURL;
+  res.redirect('/urls');
+});
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL , longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
@@ -40,22 +44,21 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
 });
+
+
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
+//Deleting a url user selects
 app.post('/urls/:shortURL/delete', (req, res) => {
   const urlToDelte = req.params.shortURL;
   delete urlDatabase[urlToDelte];
-  // res.send("gf");
   res.redirect('/urls');
 });
 
-// app.post('/memes/:id/delete', (req, res) => {
-//   const idToDelete = req.params.id;
-//   delete memes[idToDelete];
-//   res.redirect('/memes');
-// })
+
+
 
 
 app.listen(PORT, () => {
