@@ -44,6 +44,18 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const urlToDelte = req.params.shortURL;
+  delete urlDatabase[urlToDelte];
+  // res.send("gf");
+  res.redirect('/urls');
+});
+
+// app.post('/memes/:id/delete', (req, res) => {
+//   const idToDelete = req.params.id;
+//   delete memes[idToDelete];
+//   res.redirect('/memes');
+// })
 
 
 app.listen(PORT, () => {
