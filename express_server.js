@@ -67,13 +67,18 @@ app.post("/login", (req, res) => {
   res.redirect('/urls');        // Respond with 'Ok' (we will replace this)
 });
 
-//Reading the cookie data
-app.get('/urls', (req, res) => {
-  // do something with the userId
-  const templateVars = {
-    username: req.cookies["username"]
-  };
+app.post('/logout', (req, res) => {
+  res.clearCookie(`username`);
+  res.redirect('/urls');
 });
+
+//Reading the cookie data
+// app.get('/urls', (req, res) => {
+//   // do something with the userId
+//   const templateVars = {
+//     username: req.cookies["username"]
+//   };
+// });
 // res.render("urls_show", templateVars);
 
 //Reading cookies
