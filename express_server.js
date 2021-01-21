@@ -91,13 +91,12 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (req.cookies["id"]) {
-    const templateVars = { 
+    const templateVars = {
       shortURL: req.params.shortURL ,
       longURL: urlDatabase[req.params.shortURL],
       userObject: usersDB[req.cookies["id"]] };
     res.render("urls_show", templateVars);
-  }
-  else {
+  } else {
     res.send("Please login first");
   }
 });
