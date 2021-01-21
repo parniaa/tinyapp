@@ -2,7 +2,8 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser'); at the begining we used cookieparser
+const cookieSession = require('cookie-session');
 
 //bycrypt setup
 const bcrypt = require('bcrypt');
@@ -12,8 +13,18 @@ app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+//In the begining we Used cookie parse
+// app.use(cookieParser());
 
+//Using CookieSession
+app.use(
+  cookieSession({
+    name: 'session',
+    keys: ['key1', 'key2'],
+  })
+);
+//  res.cookie(`id`, userInfo.id) ===> req.session.user_id = "some value";
+//  req.cookies["id"] ====> req.session.user_id
 ////=========================>DATABASESISHS<========================================
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -45,10 +56,10 @@ app.get("/hello", (req, res) => {
 });
 ////////////////////////////////////GET URLS
 app.get("/urls", (req, res) => {
-  if (req.cookies["id"]) {
+  if (req.session["id"]) {
     const templateVars = {
       urls: urlDatabase,
-      userObject: usersDB[req.cookies["id"]]
+      userObject: usersDB[req.session["id"]]
     };
     res.render("urls_index", templateVars);
   } else {
@@ -59,7 +70,7 @@ app.get("/urls", (req, res) => {
 //////////////////(GET-REGISTER)User Registeration from
 app.get("/register", (req, res) => {
   const templateVars = {
-    userObject: usersDB[req.cookies["id"]]
+    userObject: usersDB[req.session["id"]]
   };
   res.render("register_index", templateVars);
 });
@@ -78,23 +89,24 @@ app.post("/register", (req, res) => {
     password: hashedPassword
   };
   usersDB[userInfo.id] = userInfo;
-  res.cookie(`id`, userInfo.id);
+  // res.cookie(`id`, userInfo.id); REPLACED UNDERWITH REQ.SESSION
+  req.session.id = userInfo.id;
   res.redirect('/urls');
 });
 ///////////////////adding new urls
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    userObject: usersDB[req.cookies["id"]]
+    userObject: usersDB[req.session["id"]]
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  if (req.cookies["id"]) {
+  if (req.session["id"]) {
     const templateVars = {
       shortURL: req.params.shortURL ,
       longURL: urlDatabase[req.params.shortURL],
-      userObject: usersDB[req.cookies["id"]] };
+      userObject: usersDB[req.session["id"]] };
     res.render("urls_show", templateVars);
   } else {
     res.send("Please login first");
@@ -128,7 +140,7 @@ app.post('/urls/:shortURL', (req, res) => {
 // get username and  adding it to the cookie====>USER LOGIN FORM(GET)
 app.get("/login", (req, res) => {
   const templateVars = {
-    userObject: usersDB[req.cookies["id"]]
+    userObject: usersDB[req.session["id"]]
   };
   res.render("login_index", templateVars);
 });
@@ -141,7 +153,8 @@ app.post("/login", (req, res) => {
   //   console.log("sssssss" , loginEmail , loginPassword, usersDB[key].email, usersDB[key].password);
     console.log(bcrypt.compareSync(loginPassword, usersDB[key].password));
     if (usersDB[key].email === loginEmail && bcrypt.compareSync(loginPassword, usersDB[key].password)) {
-      res.cookie(`id`, usersDB[key].id);
+      // res.cookie(`id`, usersDB[key].id); REPLACED WITH UNDER REQ.SESSION
+      req.session.id = usersDB[key].id;
       res.redirect('/urls');
     } else {
       flag = false;
@@ -153,7 +166,7 @@ app.post("/login", (req, res) => {
 });
 ////////////////////////navigate to logout
 app.post('/logout', (req, res) => {
-  res.clearCookie(`id`);
+  req.session['id'] = null;
   res.redirect('/urls');
 });
 app.listen(PORT, () => {
