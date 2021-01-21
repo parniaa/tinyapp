@@ -10,26 +10,25 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        
-         
-            <% if(!username){ %>
-              <form class="form-inline" action="/login" method="POST">
-                <div class="form-group mb-2 ">
-                <label for="longURL">Enter your name: </label>
-                <input class="form-control" type="text" name="userName" placeholder="type your username" style="width: 300px; margin: 1em">
-                <button type="submit" class="btn btn-primary">Login</button>
-                </div>
-            </form>
-            <% } else{ %>  
-              <form class="form-inline" action="/logout" method="POST">
-                <div class="form-group mb-2 ">
-                  <a class="nav-item nav-link">Wellcome! <%= username%></a>
-                  <button type="submit" class="btn btn-outline-danger">Logout</button>
-                </div>
-                </form>
-           <% } %>
-        
       </div>  
     </div>
+ 
+      
+ <% if(userObject){ %>
+   <a class="nav-item nav-link">Wellcome! <%= userObject.email%></a>
+         
+        <% } else{ %>  
+         
+            <div class="form-group mb-2 ">
+              
+              <a class="nav-item nav-link" href="/login">login</a>
+              <a class="nav-item nav-link" href="/register">Register</a>
+            </div>
+  <% } %>
+
+
+
+    
   </nav>
+
 </header>
