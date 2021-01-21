@@ -11,24 +11,21 @@
       </div>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       </div>  
+    </div>    
+
+ <% if(userObject) { %>   
+  <form class="form-inline" action="/logout" method="POST">
+    <div class="form-group mb-2 ">
+      <a class="nav-item nav-link">Wellcome! <%= userObject.email%></a>
+      <button type="submit" class="btn btn-outline-danger">Logout</button>       
     </div>
- 
-      
- <% if(userObject){ %>
-   <a class="nav-item nav-link">Wellcome! <%= userObject.email%></a>
-         
-        <% } else{ %>  
-         
-            <div class="form-group mb-2 ">
-              
-              <a class="nav-item nav-link" href="/login">login</a>
-              <a class="nav-item nav-link" href="/register">Register</a>
-            </div>
+  </form>    
+  <% } else{ %>         
+    <div class="form-group mb-2 ">
+      <a class="nav-item nav-link" href="/login">login</a>
+      <a class="nav-item nav-link" href="/register">Register</a>
+    </div>
   <% } %>
-
-
-
-    
   </nav>
 
 </header>
