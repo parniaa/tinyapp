@@ -63,7 +63,7 @@ app.get("/urls", (req, res) => {
     };
     res.render("urls_index", templateVars);
   } else {
-    res.redirect("/register");
+    res.redirect("/login");
   }
 });
 
@@ -95,10 +95,14 @@ app.post("/register", (req, res) => {
 });
 ///////////////////adding new urls
 app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    userObject: usersDB[req.session["id"]]
-  };
-  res.render("urls_new", templateVars);
+  if (req.session["id"]) {
+    const templateVars = {
+      userObject: usersDB[req.session["id"]]
+    };
+    res.render("urls_new", templateVars);
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
