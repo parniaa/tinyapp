@@ -1,5 +1,6 @@
-////=================>REQUIRES AND LIBRARY SETIUPS <=========================
+//REQUIRES AND LIBRARY SETIUPS
 const express = require("express");
+const helpers = require("./helpers.js");
 const app = express();
 const PORT = 8080; // default port 8080
 // const cookieParser = require('cookie-parser'); at the begining we used cookieparser
