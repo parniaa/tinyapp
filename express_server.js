@@ -59,8 +59,6 @@ app.get("/urls", (req, res) => {
   if (LoggedInUserID) {
     const userSpecificURLsObject = helpers.urlsForUser(LoggedInUserID,newUrlDatabase);
     const urlDatabase = helpers.urlsOnlyObject(userSpecificURLsObject);
-    console.log(LoggedInUserID, userSpecificURLsObject, urlDatabase);
-    console.log(newUrlDatabase);
     const templateVars = {
       urls: urlDatabase,
 
@@ -149,16 +147,29 @@ app.get("/u/:shortURL", (req, res) => {
 });
 //Deleting selected URL(POST)
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const urlToDelte = req.params.shortURL;
-  const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
-  delete urlDatabase[urlToDelte];
-  res.redirect('/urls');
-//updating a LongURK(POST)
+  let LoggedInUserID = req.session["id"];
+  if (LoggedInUserID) {
+    const userSpecificURLsObject = helpers.urlsForUser(LoggedInUserID,newUrlDatabase);
+    if (userSpecificURLsObject) {
+      const urlToDelte = req.params.shortURL;
+      delete newUrlDatabase[urlToDelte];
+      res.redirect('/urls');
+    }
+  }
 });
+//updating a LongURK(POST)
 app.post('/urls/:shortURL', (req, res) => {
-  const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
-  urlDatabase[req.params.shortURL] = req.body.longURL;
-  res.redirect('/urls');
+  let LoggedInUserID = req.session["id"];
+  if (LoggedInUserID) {
+    const userSpecificURLsObject = helpers.urlsForUser(LoggedInUserID,newUrlDatabase);
+    if (userSpecificURLsObject) {
+      newUrlDatabase[req.params.shortURL] = {
+        longURL: req.body.longURL,
+        userID: LoggedInUserID
+      };
+      res.redirect('/urls');
+    }
+  }
 });
 
 // get username and  adding it to the cookie====>USER LOGIN FORM(GET)
@@ -181,7 +192,6 @@ app.post("/login", (req, res) => {
     const passwordIsValid = bcrypt.compareSync(loginPassword, user["password"]);
     if (passwordIsValid) {
       req.session.id = user["id"];
-      console.log("LLLLOLLLL",user["id"]);
       res.redirect('/urls');
     } else {
       res.status(401).send('Wrong credentials(P)!, the email or password is not valid');
