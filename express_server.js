@@ -68,7 +68,7 @@ app.get("/urls", (req, res) => {
   }
 });
 
-//////////////////(GET-REGISTER)User Registeration from
+//(GET-REGISTER)User Registeration from
 app.get("/register", (req, res) => {
   const templateVars = {
     userObject: usersDB[req.session["id"]]
@@ -76,23 +76,29 @@ app.get("/register", (req, res) => {
   res.render("register_index", templateVars);
 });
 
-/////////////////(POST-REGISTER)user registeration form
+//(POST-REGISTER)user registeration form
 app.post("/register", (req, res) => {
   // If the e-mail or password are empty strings,
-  if (req.body.email === '') {
-    res.send("Error 404");
-  }
+  const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, saltRounds);
-  const userInfo = {
-    id: generateRandomString(),
-    email: req.body.email,
-    password: hashedPassword
-  };
-  usersDB[userInfo.id] = userInfo;
-  // res.cookie(`id`, userInfo.id); REPLACED UNDERWITH REQ.SESSION
-  req.session.id = userInfo.id;
-  res.redirect('/urls');
+  if (email === '' || password === '') {
+    res.status(403).send(`Error 404! The email or password is blank`);
+  }
+  const user = helpers.getUserByEmail(email, usersDB);
+  if (!user) {
+    const hashedPassword = bcrypt.hashSync(password, saltRounds);
+    const userInfo = {
+      id: helpers.generateRandomString(),
+      email: email,
+      password: hashedPassword
+    };
+    //Adding the user to the database
+    usersDB[userInfo.id] = userInfo;
+    req.session.id = userInfo.id;
+    res.redirect('/urls');
+  } else {
+    res.status(403).send(`Sorry, the email address is already registered`);
+  }
 });
 ///////////////////adding new urls
 app.get("/urls/new", (req, res) => {
@@ -120,7 +126,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //////////adding new LooongURL and using the generateRandomString function to generate shortURL
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
+  let shortURL = helpers.generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 });
@@ -155,7 +161,6 @@ app.post("/login", (req, res) => {
   let loginPassword = req.body.loginPassword;
   let flag = true;
   for (const key in usersDB) {
-  //   console.log("sssssss" , loginEmail , loginPassword, usersDB[key].email, usersDB[key].password);
     console.log(bcrypt.compareSync(loginPassword, usersDB[key].password));
     if (usersDB[key].email === loginEmail && bcrypt.compareSync(loginPassword, usersDB[key].password)) {
       // res.cookie(`id`, usersDB[key].id); REPLACED WITH UNDER REQ.SESSION
@@ -178,14 +183,7 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 //////////////////////////Random GENERATOR
-const generateRandomString = function() {
-  let result = '';
-  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
+
 
 
 // <!-- <% if(userObject.email){ %>
