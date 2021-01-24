@@ -24,9 +24,7 @@ app.use(
     keys: ['key1', 'key2'],
   })
 );
-//  res.cookie(`id`, userInfo.id) ===> req.session.user_id = "some value";
-//  req.cookies["id"] ====> req.session.user_id
-////=========================>DATABASESISHS<========================================
+//Internal DATABASE
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -44,18 +42,15 @@ const usersDB = {
   }
 };
 
-// ===============ROUTING==================>ROUTING<================ROUTING=====================
-
+////Routing
+//GET URLS
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (req.session["id"]) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-////////////////////////////////////GET URLS
 app.get("/urls", (req, res) => {
   if (req.session["id"]) {
     const templateVars = {
@@ -125,11 +120,14 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 //adding new LongURL and generate shortURL
 app.post("/urls", (req, res) => {
-  let shortURL = helpers.generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls/${shortURL}`);
+  if (req.session["id"]) {
+    let shortURL = helpers.generateRandomString();
+    urlDatabase[shortURL] = req.body.longURL;
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.send("Please login first");
+  }
 });
-
 ///Redirec to urls the target destionation after submission
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
