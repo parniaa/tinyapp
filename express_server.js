@@ -25,9 +25,12 @@ app.use(
   })
 );
 //Internal DATABASE
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+const newUrlDatabase = {
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3dowr: { longURL: "https://www.s.ca", userID: "aJ48lW" },
+  i3Bcfr: { longURL: "https://www.d.ca", userID: "aJ48lW" },
+  i2BoGr: { longURL: "https://www.gofogle.ca", userID: "aJ48lW" },
+  i3BgGr: { longURL: "https://www.google.ca", userID: "ag48lW" }
 };
 const usersDB = {
   "userRandomID": {
@@ -53,6 +56,7 @@ app.get("/", (req, res) => {
 });
 app.get("/urls", (req, res) => {
   if (req.session["id"]) {
+    const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
     const templateVars = {
       urls: urlDatabase,
       userObject: usersDB[req.session["id"]]
@@ -109,6 +113,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (req.session["id"]) {
+    const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
     const templateVars = {
       shortURL: req.params.shortURL ,
       longURL: urlDatabase[req.params.shortURL],
@@ -121,7 +126,8 @@ app.get("/urls/:shortURL", (req, res) => {
 //adding new LongURL and generate shortURL
 app.post("/urls", (req, res) => {
   if (req.session["id"]) {
-    let shortURL = helpers.generateRandomString();
+    const shortURL = helpers.generateRandomString();
+    const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
     urlDatabase[shortURL] = req.body.longURL;
     res.redirect(`/urls/${shortURL}`);
   } else {
@@ -130,17 +136,20 @@ app.post("/urls", (req, res) => {
 });
 ///Redirec to urls the target destionation after submission
 app.get("/u/:shortURL", (req, res) => {
+  const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 //Deleting selected URL(POST)
 app.post('/urls/:shortURL/delete', (req, res) => {
   const urlToDelte = req.params.shortURL;
+  const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
   delete urlDatabase[urlToDelte];
   res.redirect('/urls');
 //updating a LongURK(POST)
 });
 app.post('/urls/:shortURL', (req, res) => {
+  const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
   urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect('/urls');
 });
