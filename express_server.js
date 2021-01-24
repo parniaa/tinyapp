@@ -33,10 +33,10 @@ const newUrlDatabase = {
   i3BgGr: { longURL: "https://www.google.ca", userID: "ag48lW" }
 };
 const usersDB = {
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+  "aJ48lW": {
+    id: "aJ48lW",
+    email: "aa@aa.aa",
+    password: "aa"
   },
   "user2RandomID": {
     id: "user2RandomID",
@@ -55,11 +55,16 @@ app.get("/", (req, res) => {
   }
 });
 app.get("/urls", (req, res) => {
-  if (req.session["id"]) {
-    const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
+  let LoggedInUserID = req.session["id"];
+  if (LoggedInUserID) {
+    const userSpecificURLsObject = helpers.urlsForUser(LoggedInUserID,newUrlDatabase);
+    const urlDatabase = helpers.urlsOnlyObject(userSpecificURLsObject);
+    console.log(LoggedInUserID, userSpecificURLsObject, urlDatabase);
+    console.log(newUrlDatabase);
     const templateVars = {
       urls: urlDatabase,
-      userObject: usersDB[req.session["id"]]
+
+      userObject: usersDB[LoggedInUserID]
     };
     res.render("urls_index", templateVars);
   } else {
@@ -87,7 +92,7 @@ app.post("/register", (req, res) => {
   if (!user) {
     const hashedPassword = bcrypt.hashSync(password, saltRounds);
     const userInfo = {
-      id: helpers.generateRandomString(),
+      id: `USER${helpers.generateRandomString()}`,
       email: email,
       password: hashedPassword
     };
@@ -127,14 +132,16 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post("/urls", (req, res) => {
   if (req.session["id"]) {
     const shortURL = helpers.generateRandomString();
-    const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
-    urlDatabase[shortURL] = req.body.longURL;
+    newUrlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: req.session["id"]
+    }
     res.redirect(`/urls/${shortURL}`);
   } else {
     res.send("Please login first");
   }
 });
-///Redirec to urls the target destionation after submission
+///Redirects to urls the target destionation after submission
 app.get("/u/:shortURL", (req, res) => {
   const urlDatabase = helpers.urlsOnlyObject(newUrlDatabase);
   const longURL = urlDatabase[req.params.shortURL];
@@ -169,16 +176,18 @@ app.post("/login", (req, res) => {
     res.status(403).send(`Error 404! The email or password is blank`);
   }
   const user = helpers.getUserByEmail(loginEmail, usersDB);
+  
   if (user) {
-    const passwordIsValid = bcrypt.compareSync(loginPassword, user.password);
+    const passwordIsValid = bcrypt.compareSync(loginPassword, user["password"]);
     if (passwordIsValid) {
-      req.session.id = user.id;
+      req.session.id = user["id"];
+      console.log("LLLLOLLLL",user["id"]);
       res.redirect('/urls');
     } else {
-      res.status(401).send('Wrong credentials!, the email or password is not valid');
+      res.status(401).send('Wrong credentials(P)!, the email or password is not valid');
     }
   } else {
-    res.status(401).send('Wrong credentials!, the email or password is not valid');
+    res.status(401).send('Wrong credentials(U)!, the email or password is not valid');
   }
 });
 //navigate to logout
