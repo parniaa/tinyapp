@@ -64,7 +64,7 @@ app.get("/urls", (req, res) => {
     };
     res.render("urls_index", templateVars);
   } else {
-    res.redirect("/login");
+    res.send("Please login first");
   }
 });
 
@@ -82,7 +82,7 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (email === '' || password === '') {
-    res.status(403).send(`Error 404! The email or password is blank`);
+    res.status(404).send(`Error 404! The email or password is blank`);
   }
   const user = helpers.getUserByEmail(email, usersDB);
   if (!user) {
@@ -100,7 +100,7 @@ app.post("/register", (req, res) => {
     res.status(403).send(`Sorry, the email address is already registered`);
   }
 });
-///////////////////adding new urls
+//adding new urls
 app.get("/urls/new", (req, res) => {
   if (req.session["id"]) {
     const templateVars = {
@@ -123,25 +123,24 @@ app.get("/urls/:shortURL", (req, res) => {
     res.send("Please login first");
   }
 });
-
-//////////adding new LooongURL and using the generateRandomString function to generate shortURL
+//adding new LongURL and generate shortURL
 app.post("/urls", (req, res) => {
   let shortURL = helpers.generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
-////////////////Redirec to urls the target destionation after submission
+///Redirec to urls the target destionation after submission
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
-////////////////////////////Deleting selected URL(POST)
+//Deleting selected URL(POST)
 app.post('/urls/:shortURL/delete', (req, res) => {
   const urlToDelte = req.params.shortURL;
   delete urlDatabase[urlToDelte];
   res.redirect('/urls');
-//////////////////////////////////updating a LongURK(POST)
+//updating a LongURK(POST)
 });
 app.post('/urls/:shortURL', (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.longURL;
@@ -155,26 +154,27 @@ app.get("/login", (req, res) => {
   };
   res.render("login_index", templateVars);
 });
-//////////////////////USER LOGIN POST 
+//USER LOGIN POST
 app.post("/login", (req, res) => {
-  let loginEmail = req.body.loginEmail;
-  let loginPassword = req.body.loginPassword;
-  let flag = true;
-  for (const key in usersDB) {
-    console.log(bcrypt.compareSync(loginPassword, usersDB[key].password));
-    if (usersDB[key].email === loginEmail && bcrypt.compareSync(loginPassword, usersDB[key].password)) {
-      // res.cookie(`id`, usersDB[key].id); REPLACED WITH UNDER REQ.SESSION
-      req.session.id = usersDB[key].id;
+  const loginEmail = req.body.loginEmail;
+  const loginPassword = req.body.loginPassword;
+  if (loginEmail === '' || loginPassword === '') {
+    res.status(403).send(`Error 404! The email or password is blank`);
+  }
+  const user = helpers.getUserByEmail(loginEmail, usersDB);
+  if (user) {
+    const passwordIsValid = bcrypt.compareSync(loginPassword, user.password);
+    if (passwordIsValid) {
+      req.session.id = user.id;
       res.redirect('/urls');
     } else {
-      flag = false;
+      res.status(401).send('Wrong credentials!, the email or password is not valid');
     }
-  }
-  if (!flag) {
-    res.status(401).send('Wrong credentials!');
+  } else {
+    res.status(401).send('Wrong credentials!, the email or password is not valid');
   }
 });
-////////////////////////navigate to logout
+//navigate to logout
 app.post('/logout', (req, res) => {
   req.session['id'] = null;
   res.redirect('/urls');
@@ -182,19 +182,3 @@ app.post('/logout', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-//////////////////////////Random GENERATOR
-
-
-
-// <!-- <% if(userObject.email){ %>
-//   <a class="nav-item nav-link">Wellcome! <%= userObject.email%></a>
-//          <a class="nav-item nav-link" href="/login">login</a>
-//          <a class="nav-item nav-link" href="/register">Register</a>
-//        <% } else{ %>  
-//          <form class="form-inline" action="/logout" method="POST">
-//            <div class="form-group mb-2 ">
-//              <a class="nav-item nav-link">Wellcome! <%= userObject.email%></a>
-           
-//            </div>
-//            </form>
-//       <% } %> -->
